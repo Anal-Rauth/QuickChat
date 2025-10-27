@@ -55,17 +55,17 @@ const Sidebar = () => {
         <div className='flex justify-between items-center'>
             <img src={assets.logo} alt="logo" className='max-w-40' />
                         <div className="relative py-2 group" ref={menuRef}>
-                                <button
-                                    aria-haspopup="true"
-                                    aria-expanded={showMenu}
-                                    aria-label="Open menu"
-                                    className="max-h-5 cursor-pointer p-1 rounded"
-                                    onClick={()=> setShowMenu(prev=>!prev)}
-                                >
-                                    <img src={assets.menu_icon} alt="Menu" />
-                                </button>
+                                                <button
+                                                    aria-haspopup="true"
+                                                    aria-expanded={showMenu}
+                                                    aria-label="Open menu"
+                                                    className="bg-transparent p-0 flex items-center justify-center"
+                                                    onClick={()=> setShowMenu(prev=>!prev)}
+                                                >
+                                                    <img src={assets.menu_icon} alt="Menu" className="w-6 h-6 object-contain"/>
+                                                </button>
                                 {/* show menu on hover (desktop) or on click (mobile). md:group-hover:block preserves desktop hover */}
-                                <div className={`absolute top-full right-0 z-20 w-40 p-3 rounded-md bg-[#282142] border border-gray-600 text-gray-100 ${showMenu ? 'block' : 'hidden'} md:group-hover:block`}>
+                                <div className={`absolute mt-2 top-full right-0 z-20 w-40 p-3 rounded-md bg-[#282142] border border-gray-600 text-gray-100 ${showMenu ? 'block' : 'hidden'} md:group-hover:block`}>
                                         <button onClick={()=>{ setShowMenu(false); navigate('/profile')}} className='w-full text-left cursor-pointer text-sm py-1'>Edit Profile</button>
                                         <hr className="my-2 border-t border-gray-500" />
                                         <button onClick={()=> { setShowMenu(false); logout()}} className='w-full text-left cursor-pointer text-sm py-1'>Logout</button>
