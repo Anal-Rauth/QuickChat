@@ -55,15 +55,20 @@ const Sidebar = () => {
         <div className='flex justify-between items-center'>
             <img src={assets.logo} alt="logo" className='max-w-40' />
                         <div className="relative py-2 group" ref={menuRef}>
-                                                <button
-                                                    aria-haspopup="true"
-                                                    aria-expanded={showMenu}
-                                                    aria-label="Open menu"
-                                                    className="bg-transparent p-0 flex items-center justify-center"
-                                                    onClick={()=> setShowMenu(prev=>!prev)}
-                                                >
-                                                    <img src={assets.menu_icon} alt="Menu" className="w-6 h-6 object-contain"/>
-                                                </button>
+                                                                <button
+                                                                    aria-haspopup="true"
+                                                                    aria-expanded={showMenu}
+                                                                    aria-label="Open menu"
+                                                                    className="bg-transparent p-0 flex items-center justify-center text-white"
+                                                                    onClick={()=> setShowMenu(prev=>!prev)}
+                                                                >
+                                                                    {/* Inline SVG three-dot (vertical) icon - crisp on all screens */}
+                                                                    <svg className="w-6 h-6" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                                                                        <circle cx="12" cy="5" r="2" />
+                                                                        <circle cx="12" cy="12" r="2" />
+                                                                        <circle cx="12" cy="19" r="2" />
+                                                                    </svg>
+                                                                </button>
                                 {/* show menu on hover (desktop) or on click (mobile). md:group-hover:block preserves desktop hover */}
                                 <div className={`absolute mt-2 top-full right-0 z-20 w-40 p-3 rounded-md bg-[#282142] border border-gray-600 text-gray-100 ${showMenu ? 'block' : 'hidden'} md:group-hover:block`}>
                                         <button onClick={()=>{ setShowMenu(false); navigate('/profile')}} className='w-full text-left cursor-pointer text-sm py-1'>Edit Profile</button>
