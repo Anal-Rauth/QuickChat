@@ -61,6 +61,42 @@ export const markMessageAsSeen = async (req, res)=>{
     }
 }
 
+// Delete message by id
+export const deleteMessage = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const message = await Message.findById(id);
+
+        // Check if message exists and user is the sender
+        if (!message) {
+            return res.json({ success: false, message: "Message not found" });
+        }
+        
+        if (message.senderId.toString() !== req.user._id.toString()) {
+            return res.json({ success: false, message: "Unauthorized to delete this message" });
+        }
+
+        // If message has an image, delete from cloudinary
+        if (message.image) {
+            const publicId = message.image.split('/').pop().split('.')[0];
+            await cloudinary.uploader.destroy(publicId);
+        }
+
+        await Message.findByIdAndDelete(id);
+
+        // Notify the receiver about message deletion through socket
+        const receiverSocketId = userSocketMap[message.receiverId.toString()];
+        if (receiverSocketId) {
+            io.to(receiverSocketId).emit("messageDeleted", id);
+        }
+
+        res.json({ success: true, messageId: id });
+    } catch (error) {
+        console.log(error.message);
+        res.json({ success: false, message: error.message });
+    }
+};
+
 // Send message to selected user
 export const sendMessage = async (req, res) =>{
     try {
