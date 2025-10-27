@@ -6,7 +6,7 @@ const TEST_IMAGE_URL = 'https://via.placeholder.com/150';
 async function run() {
   try {
     console.log('Uploading test image to Cloudinary...');
-    const res = await cloudinary.uploader.upload(TEST_IMAGE_URL, { folder: 'quickchat_tests' });
+    const res = await cloudinary.uploader.upload(TEST_IMAGE_URL, { folder: 'quickChat_tests' });
     console.log('Upload result (public_id):', res.public_id);
     console.log('Secure URL:', res.secure_url);
     process.exit(0);
