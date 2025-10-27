@@ -11,7 +11,6 @@ export const ChatProvider = ({ children })=>{
     const [users, setUsers] = useState([]);
     const [selectedUser, setSelectedUser] = useState(null)
     const [unseenMessages, setUnseenMessages] = useState({})
-    const [selectedMessage, setSelectedMessage] = useState(null);
 
     const {socket, axios} = useContext(AuthContext);
 
@@ -54,21 +53,6 @@ export const ChatProvider = ({ children })=>{
         }
     }
 
-    // function to delete a message
-    const deleteMessage = async (messageId) => {
-        try {
-            const {data} = await axios.delete(`/api/messages/delete/${messageId}`);
-            if(data.success){
-                setMessages(messages => messages.filter(msg => msg._id !== messageId));
-                toast.success("Message deleted successfully");
-            } else {
-                toast.error(data.message);
-            }
-        } catch (error) {
-            toast.error(error.message);
-        }
-    }
-
     // function to subscribe to messages for selected user
     const subscribeToMessages = async () =>{
         if(!socket) return;
@@ -83,11 +67,7 @@ export const ChatProvider = ({ children })=>{
                     ...prevUnseenMessages, [newMessage.senderId] : prevUnseenMessages[newMessage.senderId] ? prevUnseenMessages[newMessage.senderId] + 1 : 1
                 }))
             }
-        });
-
-        socket.on("messageDeleted", (messageId) => {
-            setMessages(messages => messages.filter(msg => msg._id !== messageId));
-        });
+        })
     }
 
     // function to unsubscribe from messages
@@ -101,8 +81,7 @@ export const ChatProvider = ({ children })=>{
     },[socket, selectedUser])
 
     const value = {
-        messages, users, selectedUser, getUsers, getMessages, sendMessage, setSelectedUser, 
-        unseenMessages, setUnseenMessages, deleteMessage, selectedMessage, setSelectedMessage
+        messages, users, selectedUser, getUsers, getMessages, sendMessage, setSelectedUser, unseenMessages, setUnseenMessages
     }
 
     return (
