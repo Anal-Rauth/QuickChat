@@ -61,6 +61,54 @@ export const markMessageAsSeen = async (req, res)=>{
     }
 }
 
+// Delete message by id with proper error handling
+export const deleteMessage = async (req, res) => {
+    try {
+        const { id } = req.params;
+        
+        // Validate message id
+        if (!mongoose.Types.ObjectId.isValid(id)) {
+            return res.json({ success: false, message: "Invalid message ID format" });
+        }
+
+        const message = await Message.findById(id);
+
+        // Proper error handling for non-existent message
+        if (!message) {
+            return res.json({ success: false, message: "Message not found" });
+        }
+        
+        // Ensure user can only delete their own messages
+        if (message.senderId.toString() !== req.user._id.toString()) {
+            return res.json({ success: false, message: "Unauthorized to delete this message" });
+        }
+
+        // Handle image deletion with error catching
+        if (message.image) {
+            try {
+                const publicId = message.image.split('/').pop().split('.')[0];
+                await cloudinary.uploader.destroy(publicId);
+            } catch (cloudinaryError) {
+                console.error("Cloudinary deletion error:", cloudinaryError);
+                // Continue with message deletion even if image deletion fails
+            }
+        }
+
+        await Message.findByIdAndDelete(id);
+
+        // Only emit to socket if connection exists
+        const receiverSocketId = userSocketMap[message.receiverId.toString()];
+        if (receiverSocketId) {
+            io.to(receiverSocketId).emit("messageDeleted", id);
+        }
+
+        res.json({ success: true, messageId: id });
+    } catch (error) {
+        console.error("Delete message error:", error);
+        res.json({ success: false, message: "Failed to delete message" });
+    }
+};
+
 // Send message to selected user
 export const sendMessage = async (req, res) =>{
     try {

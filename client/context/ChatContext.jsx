@@ -11,8 +11,9 @@ export const ChatProvider = ({ children })=>{
     const [users, setUsers] = useState([]);
     const [selectedUser, setSelectedUser] = useState(null)
     const [unseenMessages, setUnseenMessages] = useState({})
+    const [isDeleting, setIsDeleting] = useState(false)
 
-    const {socket, axios} = useContext(AuthContext);
+    const {socket, axios, authUser} = useContext(AuthContext);
 
     // function to get all users for sidebar
     const getUsers = async () =>{
@@ -53,9 +54,42 @@ export const ChatProvider = ({ children })=>{
         }
     }
 
+    // function to delete message with proper error handling
+    const deleteMessage = async (messageId) => {
+        if (!socket?.connected) {
+            toast.error("Not connected to chat server");
+            return;
+        }
+
+        if (isDeleting) {
+            return; // Prevent multiple delete requests
+        }
+
+        try {
+            setIsDeleting(true);
+            const {data} = await axios.delete(`/api/messages/delete/${messageId}`);
+            
+            if(data.success){
+                setMessages(prevMessages => prevMessages.filter(msg => msg._id !== messageId));
+                toast.success("Message deleted");
+            } else {
+                toast.error(data.message);
+            }
+        } catch (error) {
+            console.error("Delete message error:", error);
+            toast.error("Failed to delete message");
+        } finally {
+            setIsDeleting(false);
+        }
+    };
+
     // function to subscribe to messages for selected user
     const subscribeToMessages = async () =>{
-        if(!socket) return;
+        if(!socket?.connected) return;
+
+        // Clean up existing listeners
+        socket.off("newMessage");
+        socket.off("messageDeleted");
 
         socket.on("newMessage", (newMessage)=>{
             if(selectedUser && newMessage.senderId === selectedUser._id){
@@ -64,10 +98,15 @@ export const ChatProvider = ({ children })=>{
                 axios.put(`/api/messages/mark/${newMessage._id}`);
             }else{
                 setUnseenMessages((prevUnseenMessages)=>({
-                    ...prevUnseenMessages, [newMessage.senderId] : prevUnseenMessages[newMessage.senderId] ? prevUnseenMessages[newMessage.senderId] + 1 : 1
+                    ...prevUnseenMessages, 
+                    [newMessage.senderId] : prevUnseenMessages[newMessage.senderId] ? prevUnseenMessages[newMessage.senderId] + 1 : 1
                 }))
             }
-        })
+        });
+
+        socket.on("messageDeleted", (messageId) => {
+            setMessages(prevMessages => prevMessages.filter(msg => msg._id !== messageId));
+        });
     }
 
     // function to unsubscribe from messages
@@ -81,7 +120,8 @@ export const ChatProvider = ({ children })=>{
     },[socket, selectedUser])
 
     const value = {
-        messages, users, selectedUser, getUsers, getMessages, sendMessage, setSelectedUser, unseenMessages, setUnseenMessages
+        messages, users, selectedUser, getUsers, getMessages, sendMessage, setSelectedUser, 
+        unseenMessages, setUnseenMessages, deleteMessage, isDeleting
     }
 
     return (
