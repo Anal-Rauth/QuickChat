@@ -87,7 +87,7 @@ Mastered frontend-backend synchronization using React Context and Socket.io even
 🧰 Redis adapter for horizontal scaling
 
 
-Made by Anal Rauth.
+Made by Anal Rauth
 ---
 
 
